@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: html_head('Admin Dashboard Panel')}"></head>
+<body>
+    <header th:replace="~{layout :: navbar}"></header>
+
+    <main class="container">
+        <!-- Dashboard Header -->
+        <div class="section-header">
+            <div>
+                <h1 style="color: #fff;">Platform Administration</h1>
+                <p style="color: var(--text-secondary); font-size: 0.95rem;">Monitor multi-vendor bookstore statistics and review vendor credentials.</p>
+            </div>
+        </div>
+
+        <!-- Alert messages -->
+        <div th:if="${param.success}" class="alert alert-success" th:text="${param.success}">Success message</div>
+        <div th:if="${param.error}" class="alert alert-danger" th:text="${param.error}">Error message</div>
+
+        <!-- Global Platform Stats -->
+        <section class="dashboard-grid">
+            <div class="stat-card">
+                <span class="stat-label">Platform Gross Sales</span>
+                <span class="stat-value" th:text="'$' + ${#numbers.formatDecimal(totalSales, 1, 2)}">$0.00</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Gross Orders</span>
+                <span class="stat-value" th:text="${totalOrders}">0</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Registered Vendors</span>
+                <span class="stat-value" th:text="${vendorCount}">0</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Active Buyers</span>
+                <span class="stat-value" th:text="${buyerCount}">0</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Global Book Catalog</span>
+                <span class="stat-value" th:text="${bookCount}">0</span>
+            </div>
+        </section>
+
+        <!-- Pending Vendor Applications -->
+        <section class="dashboard-section">
+            <h2 style="margin-bottom: 1rem; color: #fff;">Pending Vendor Registrations</h2>
+            
+            <div th:if="${pendingVendors.isEmpty()}" style="text-align: center; padding: 3rem; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <p style="color: var(--text-secondary);">No vendor registration requests are currently pending review.</p>
+            </div>
+
+            <div class="table-wrapper" th:if="${!pendingVendors.isEmpty()}">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Bookstore Name</th>
+                            <th>Applicant Username</th>
+                            <th>Contact Email</th>
+                            <th>Status Badge</th>
+                            <th>Action Review</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="vendor : ${pendingVendors}">
+                            <td style="font-weight:600; color:#fff;" th:text="${vendor.vendorName}">Bookstore Name</td>
+                            <td th:text="${vendor.username}">username</td>
+                            <td th:text="${vendor.email}">email@domain.com</td>
+                            <td>
+                                <span class="status-badge status-pending">PENDING APPROVAL</span>
+                            </td>
+                            <td>
+                                <form th:action="@{/admin/vendor/approve}" method="post" style="margin:0;">
+                                    <input type="hidden" name="vendorId" th:value="${vendor.id}">
+                                    <button type="submit" class="btn btn-primary" style="padding: 0.35rem 0.85rem; font-size: 0.8rem; border-radius: var(--radius-sm);">
+                                        Approve Account
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Approved Platform Vendors -->
+        <section class="dashboard-section">
+            <h2 style="margin-bottom: 1rem; color: #fff;">Approved Platform Vendors</h2>
+            
+            <div th:if="${approvedVendors.isEmpty()}" style="text-align: center; padding: 3rem; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <p style="color: var(--text-secondary);">No vendors are currently active on the platform.</p>
+            </div>
+
+            <div class="table-wrapper" th:if="${!approvedVendors.isEmpty()}">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Bookstore Name</th>
+                            <th>Vendor Username</th>
+                            <th>Contact Email</th>
+                            <th>Status Badge</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="vendor : ${approvedVendors}">
+                            <td style="font-weight:600; color:#fff;" th:text="${vendor.vendorName}">Bookstore Name</td>
+                            <td th:text="${vendor.username}">username</td>
+                            <td th:text="${vendor.email}">email@domain.com</td>
+                            <td>
+                                <span class="status-badge status-delivered">ACTIVE VENDOR</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

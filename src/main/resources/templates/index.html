@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: html_head('Explore Books')}"></head>
+<body>
+    <header th:replace="~{layout :: navbar}"></header>
+
+    <main class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>Discover Stories from Global Vendors</h1>
+            <p>Buy directly from independent booksellers and publishers around the world, all on one elegant platform.</p>
+        </section>
+
+        <!-- Search & Filter Controls -->
+        <section class="search-filter-section">
+            <!-- Search bar -->
+            <form th:action="@{/}" method="get" class="search-bar">
+                <input type="hidden" name="category" th:value="${selectedCategory}" />
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" name="search" th:value="${searchQuery}" class="search-input" placeholder="Search by book title or author..." onchange="this.form.submit()" />
+            </form>
+
+            <!-- Category list -->
+            <div class="filter-categories">
+                <a th:href="@{/(category='All', search=${searchQuery})}" 
+                   class="filter-chip" 
+                   th:classappend="${selectedCategory == 'All'} ? 'active'">All Categories</a>
+                
+                <a th:each="cat : ${categories}" 
+                   th:href="@{/(category=${cat}, search=${searchQuery})}" 
+                   class="filter-chip" 
+                   th:classappend="${selectedCategory == cat} ? 'active'"
+                   th:text="${cat}">Category</a>
+            </div>
+        </section>
+
+        <!-- Books Listing -->
+        <div th:if="${books.isEmpty()}" style="text-align: center; padding: 4rem; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-secondary); margin-bottom: 1rem;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+            <h3>No books found</h3>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem;">Try refining your keywords or choosing another category.</p>
+        </div>
+
+        <section class="book-grid" th:if="${!books.isEmpty()}">
+            <article class="book-card" th:each="book : ${books}">
+                <div class="book-cover-container">
+                    <span class="book-badge" th:text="${book.category}">Category</span>
+                    <img th:src="${book.coverUrl}" class="book-cover" alt="Book Cover" />
+                </div>
+                <div class="book-info">
+                    <span class="book-vendor" th:text="${book.vendor.vendorName}">Vendor Shop</span>
+                    <h3 class="book-title" th:text="${book.title}">Book Title</h3>
+                    <span class="book-author" th:text="'by ' + ${book.author}">by Author</span>
+                    
+                    <div class="book-footer">
+                        <span class="book-price" th:text="'$' + ${#numbers.formatDecimal(book.price, 1, 2)}">$0.00</span>
+                        
+                        <!-- Add to Cart (Only for Buyers and Guests) -->
+                        <form th:if="${currentUser == null || currentUser.role == 'BUYER'}" class="add-to-cart-form" style="display:inline;">
+                            <input type="hidden" name="bookId" th:value="${book.id}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-primary" style="padding: 0.5rem 0.85rem; font-size: 0.8rem; border-radius: var(--radius-sm);" th:disabled="${book.stock <= 0}">
+                                <span th:text="${book.stock > 0} ? 'Add' : 'Sold Out'">Add</span>
+                            </button>
+                        </form>
+                        
+                        <a th:href="@{/book/{id}(id=${book.id})}" class="btn btn-secondary" style="padding: 0.5rem 0.85rem; font-size: 0.8rem; border-radius: var(--radius-sm);">
+                            Details
+                        </a>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

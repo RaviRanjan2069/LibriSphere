@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: html_head('My Shopping Cart')}"></head>
+<body>
+    <header th:replace="~{layout :: navbar}"></header>
+
+    <main class="container">
+        <h1 style="margin-bottom: 2rem;">Your Cart</h1>
+
+        <div th:if="${cartItems.isEmpty()}" style="text-align: center; padding: 4rem; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-secondary); margin-bottom: 1rem;">
+                <circle cx="8" cy="21" r="1"></circle>
+                <circle cx="19" cy="21" r="1"></circle>
+                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+            </svg>
+            <h3>Your cart is empty</h3>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem; margin-bottom: 1.5rem;">Fill it with stories and guides from our vendors.</p>
+            <a th:href="@{/}" class="btn btn-primary">Start Shopping</a>
+        </div>
+
+        <div class="cart-layout" th:if="${!cartItems.isEmpty()}">
+            <!-- Cart items table -->
+            <div class="glass-card" style="padding: 1.5rem; overflow-x: auto;">
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            <th>Book Details</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="item : ${cartItems}">
+                            <td class="cart-item-info">
+                                <img th:src="${item.book.coverUrl}" class="cart-item-img" alt="Cover">
+                                <div>
+                                    <h4 th:text="${item.book.title}">Book Title</h4>
+                                    <span style="font-size: 0.75rem; color: var(--text-secondary);" th:text="'by ' + ${item.book.author}">Author</span>
+                                    <span style="display: block; font-size: 0.7rem; color: var(--color-primary);" th:text="'Vendor: ' + ${item.book.vendor.vendorName}">Vendor</span>
+                                </div>
+                            </td>
+                            <td th:text="'$' + ${#numbers.formatDecimal(item.book.price, 1, 2)}">$0.00</td>
+                            <td>
+                                <form th:action="@{/cart/update}" method="post" style="display: flex; align-items: center; gap: 0.25rem;">
+                                    <input type="hidden" name="bookId" th:value="${item.book.id}">
+                                    <input type="number" name="quantity" th:value="${item.quantity}" min="1" th:max="${item.book.stock}" 
+                                           style="width: 55px; padding: 0.25rem; text-align: center;" onchange="this.form.submit()">
+                                </form>
+                            </td>
+                            <td th:text="'$' + ${#numbers.formatDecimal(item.total, 1, 2)}">$0.00</td>
+                            <td>
+                                <form th:action="@{/cart/remove}" method="post">
+                                    <input type="hidden" name="bookId" th:value="${item.book.id}">
+                                    <button type="submit" class="btn btn-danger" style="padding: 0.35rem 0.7rem; font-size: 0.75rem;">
+                                        Remove
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Summary sidebar -->
+            <div class="cart-summary">
+                <h3 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Order Summary</h3>
+                
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span th:text="'$' + ${#numbers.formatDecimal(subtotal, 1, 2)}">$0.00</span>
+                </div>
+                
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span class="status-badge status-delivered" style="font-size: 0.75rem;">FREE</span>
+                </div>
+
+                <div class="summary-row total">
+                    <span>Estimated Total</span>
+                    <span th:text="'$' + ${#numbers.formatDecimal(subtotal, 1, 2)}">$0.00</span>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <a th:href="@{/checkout}" class="btn btn-primary" style="width: 100%;">
+                        Proceed to Checkout
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </a>
+                </div>
+                
+                <p style="font-size: 0.75rem; color: var(--text-secondary); text-align: center; margin-top: 1rem;">
+                    Orders are processed by their respective vendors immediately.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

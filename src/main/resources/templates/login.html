@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: html_head('Login')}"></head>
+<body>
+    <header th:replace="~{layout :: navbar}"></header>
+
+    <main class="container">
+        <div class="auth-container glass-card">
+            <h2 style="margin-bottom: 0.5rem; text-align: center; color: #fff;">Welcome Back</h2>
+            <p style="color: var(--text-secondary); text-align: center; margin-bottom: 2rem; font-size: 0.9rem;">Access your dashboard or store profile.</p>
+
+            <!-- Error alert -->
+            <div th:if="${error}" class="alert alert-danger" th:text="${error}">Error details</div>
+            
+            <!-- Success message -->
+            <div th:if="${success}" class="alert alert-success" th:text="${success}">Success details</div>
+
+            <!-- Login form -->
+            <form th:action="@{/login}" method="post">
+                <div class="form-group">
+                    <label class="form-label" for="username">Username</label>
+                    <input type="text" id="username" name="username" class="form-input" required placeholder="Enter username">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-input" required placeholder="Enter password">
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem;">
+                    Sign In
+                </button>
+            </form>
+
+            <div style="margin-top: 2rem; text-align: center; font-size: 0.85rem; color: var(--text-secondary);">
+                Don't have an account? 
+                <a th:href="@{/register}" style="color: var(--color-primary); font-weight: 600;">Sign Up Here</a>
+            </div>
+
+            <!-- Demo accounts helper card -->
+            <div style="margin-top: 2.5rem; padding: 1rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.75rem; line-height: 1.5;">
+                <h4 style="color: var(--color-primary); margin-bottom: 0.5rem;">🔑 Sandbox Demo Credentials:</h4>
+                <p><strong>Buyer:</strong> <code>buyer</code> / <code>buyer123</code></p>
+                <p><strong>Vendor (Apex Books):</strong> <code>vendor_a</code> / <code>vendor123</code></p>
+                <p><strong>Vendor (Beacon Bookshop):</strong> <code>vendor_b</code> / <code>vendor123</code></p>
+                <p><strong>Administrator:</strong> <code>admin</code> / <code>admin123</code></p>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

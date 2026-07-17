@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: html_head('My Order History')}"></head>
+<body>
+    <header th:replace="~{layout :: navbar}"></header>
+
+    <main class="container" style="max-width: 900px;">
+        <h1 style="margin-bottom: 2rem;">Order History</h1>
+
+        <div th:if="${orders.isEmpty()}" style="text-align: center; padding: 4rem; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-secondary); margin-bottom: 1rem;">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="2" y1="10" x2="22" y2="10"></line>
+                <path d="M12 17H12.01"></path>
+            </svg>
+            <h3>No orders placed yet</h3>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem; margin-bottom: 1.5rem;">You haven't bought any books on LibriSphere yet.</p>
+            <a th:href="@{/}" class="btn btn-primary">Start Shopping</a>
+        </div>
+
+        <div th:if="${!orders.isEmpty()}">
+            <div th:each="order : ${orders}" class="glass-card" style="margin-bottom: 2rem; padding: 1.5rem;">
+                <!-- Header of the Order Card -->
+                <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <span style="font-size:0.8rem; color: var(--text-secondary); display:block;">Order Reference</span>
+                        <strong style="color: var(--color-secondary); font-family: monospace;" th:text="'#LBS-' + ${order.id}">#LBS-0</strong>
+                    </div>
+                    <div>
+                        <span style="font-size:0.8rem; color: var(--text-secondary); display:block;">Placed On</span>
+                        <span th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd HH:mm')}">Date</span>
+                    </div>
+                    <div>
+                        <span style="font-size:0.8rem; color: var(--text-secondary); display:block;">Total Paid</span>
+                        <strong th:text="'$' + ${#numbers.formatDecimal(order.totalPrice, 1, 2)}">$0.00</strong>
+                    </div>
+                    <div>
+                        <span style="font-size:0.8rem; color: var(--text-secondary); display:block;">Delivery Status</span>
+                        <span class="status-badge" 
+                              th:classappend="${order.status == 'PENDING' ? 'status-pending' : (order.status == 'SHIPPED' ? 'status-shipped' : 'status-delivered')}"
+                              th:text="${order.status}">PENDING</span>
+                    </div>
+                </div>
+
+                <!-- Items Purchased in this order -->
+                <div style="margin-bottom: 1rem;">
+                    <h4 style="margin-bottom: 0.75rem; font-size: 0.9rem; color: #fff;">Books Purchased</h4>
+                    <div th:each="item : ${order.items}" style="display:flex; align-items:center; gap: 1rem; margin-bottom: 0.75rem; background: rgba(0,0,0,0.1); padding: 0.5rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                        <img th:src="${item.book.coverUrl}" style="width: 30px; height: 42px; object-fit: cover; border-radius: 2px;" />
+                        <div style="flex:1;">
+                            <h5 style="font-size: 0.85rem;" th:text="${item.book.title}">Book Title</h5>
+                            <span style="font-size: 0.75rem; color: var(--text-secondary);" th:text="'Sold by: ' + ${item.vendor.vendorName}">Vendor</span>
+                        </div>
+                        <div style="text-align:right;">
+                            <span style="font-size: 0.8rem; display:block;" th:text="${item.quantity} + 'x @ $' + ${#numbers.formatDecimal(item.price, 1, 2)}">1x @ $0.00</span>
+                            <span class="status-badge" style="font-size: 0.65rem; margin-top: 0.25rem; padding: 0.1rem 0.5rem;"
+                                  th:classappend="${item.status == 'PENDING' ? 'status-pending' : (item.status == 'SHIPPED' ? 'status-shipped' : 'status-delivered')}"
+                                  th:text="${item.status}">PENDING</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping detail -->
+                <div style="font-size: 0.8rem; color: var(--text-secondary); border-top: 1px dashed var(--border-color); padding-top: 0.75rem; display: flex; justify-content: space-between;">
+                    <span>Shipping Address: <strong style="color: var(--text-primary);" th:text="${order.shippingAddress}">Address</strong></span>
+                    <span>Phone: <strong style="color: var(--text-primary);" th:text="${order.contactNumber}">Phone</strong></span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

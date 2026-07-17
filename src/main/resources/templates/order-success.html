@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: html_head('Order Placed Successfully')}"></head>
+<body>
+    <header th:replace="~{layout :: navbar}"></header>
+
+    <main class="container" style="max-width: 600px; text-align: center; margin-top: 5rem;">
+        <div class="glass-card" style="padding: 3rem 2rem;">
+            <!-- Big Success Checkmark -->
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); border: 2px solid var(--success); display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+
+            <h1 style="color: #fff; margin-bottom: 0.5rem;">Thank You for Your Purchase!</h1>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">Your order has been authorized and dispatched to our vendors.</p>
+
+            <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1.5rem; text-align: left; margin-bottom: 2rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                    <span style="font-weight:600; color: var(--text-secondary);">Order Reference</span>
+                    <strong style="color: var(--color-secondary); font-family: monospace;" th:text="'#LBS-' + ${order.id}">#LBS-0</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom: 0.75rem;">
+                    <span>Recipient</span>
+                    <span th:text="${order.buyerName}">Jane Doe</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom: 0.75rem;">
+                    <span>Total Amount</span>
+                    <strong th:text="'$' + ${#numbers.formatDecimal(order.totalPrice, 1, 2)}">$0.00</strong>
+                </div>
+                <div style="margin-top: 0.75rem;">
+                    <span style="display:block; font-size:0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Shipping Address</span>
+                    <span style="font-size:0.9rem;" th:text="${order.shippingAddress}">Address...</span>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:1rem; justify-content:center;">
+                <a th:href="@{/}" class="btn btn-secondary">Continue Shopping</a>
+                <a th:href="@{/orders}" class="btn btn-primary">Track in My Orders</a>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>
