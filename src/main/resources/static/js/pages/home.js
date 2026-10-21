@@ -8,7 +8,8 @@ import { toast } from '../ui.js';
 import { alert, cover, emptyState, flash, loading, setTitle } from '../components.js';
 import { homeIcon, searchIcon, shieldIcon, truckIcon } from '../icons.js';
 
-const HERO_COVERS = ['8739161', '8739165', '8739660', '8228691', '8739167', '9255566'];
+// Stored with the site (static/covers/<ISBN>.jpg), so they load even where Open Library is unreachable
+const HERO_COVERS = ['9780441013593', '9780593135204', '9780141439518', '9780374533557', '9780804139021', '9788173711466'];
 const SORTS = [
     ['featured', 'Featured'], ['newest', 'Newest'], ['price-asc', 'Price: low to high'],
     ['price-desc', 'Price: high to low'], ['title', 'Title A–Z'],
@@ -32,7 +33,7 @@ const hero = showSell => html`
                 </ul>
             </div>
             <div class="hero-covers" aria-hidden="true">
-                ${HERO_COVERS.map(id => html`<div class="cover"><img src="https://covers.openlibrary.org/b/id/${id}-L.jpg" alt=""></div>`)}
+                ${HERO_COVERS.map(id => html`<div class="cover"><img src="/covers/${id}.jpg" alt=""></div>`)}
             </div>
         </div>
     </section>`;

@@ -6,10 +6,6 @@
   "outputDirectory": "src/main/resources/static",
   "rewrites": [
     {
-      "source": "/ol-covers/:path*",
-      "destination": "https://covers.openlibrary.org/:path*"
-    },
-    {
       "source": "/api/:path*",
       "destination": "https://librisphere-api-ar00.onrender.com/api/:path*"
     },

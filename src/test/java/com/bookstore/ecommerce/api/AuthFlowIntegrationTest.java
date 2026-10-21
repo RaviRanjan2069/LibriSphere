@@ -693,6 +693,29 @@ class AuthFlowIntegrationTest {
         assertEquals(0, body(mvc.perform(get("/api/support").session(user)).andReturn()).at("/requests").size());
     }
 
+    @Autowired com.bookstore.ecommerce.config.CoverMigration coverMigration;
+
+    @Test
+    void openLibraryCoversSwitchToStoredCopiesWhenAvailable() throws Exception {
+        com.bookstore.ecommerce.model.Book stored = new com.bookstore.ecommerce.model.Book();
+        stored.setTitle("Dune");
+        stored.setCoverUrl("https://covers.openlibrary.org/b/isbn/9780441013593-L.jpg");
+        com.bookstore.ecommerce.model.Book missing = new com.bookstore.ecommerce.model.Book();
+        missing.setTitle("No stored cover");
+        missing.setCoverUrl("https://covers.openlibrary.org/b/isbn/0000000000000-L.jpg");
+        stored = mongo.save(stored);
+        missing = mongo.save(missing);
+
+        coverMigration.run();
+
+        assertEquals("/covers/9780441013593.jpg", mongo.findById(stored.getId(), com.bookstore.ecommerce.model.Book.class).getCoverUrl());
+        assertEquals("https://covers.openlibrary.org/b/isbn/0000000000000-L.jpg",
+                mongo.findById(missing.getId(), com.bookstore.ecommerce.model.Book.class).getCoverUrl(), "left alone without a stored copy");
+        mvc.perform(get("/covers/9780441013593.jpg")).andExpect(status().isOk());
+        mongo.remove(stored);
+        mongo.remove(missing);
+    }
+
     @Test
     void roleRestrictionsStillApply() throws Exception {
         MockHttpSession buyer = new MockHttpSession();
