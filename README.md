@@ -52,10 +52,12 @@ On first start the database is filled with demo sellers, books and orders. Witho
 To work on the frontend, edit the files in `src/main/resources/static/` and reload the browser. There is nothing to install or build.
 
 ## 🌐 Deployment (Vercel + Render + MongoDB Atlas)
+Live site: **https://librisphere-bookstore.vercel.app**
+
 Vercel can't run a Java server, so the app is split across three free services:
 
 ```
-Browser ──▶ <project>.vercel.app
+Browser ──▶ librisphere-bookstore.vercel.app
              ├─ HTML / CSS / JS            served by Vercel (src/main/resources/static)
              └─ /api/*, /media/*  ──proxy──▶ Render: Spring Boot in Docker (render.yaml, Dockerfile)
                                                 └─▶ MongoDB Atlas
@@ -67,9 +69,8 @@ The browser only ever talks to the Vercel address, so sign-in cookies work as on
    - `MONGODB_URI`: the Atlas connection string
    - `ADMIN_PASSWORD`: password for the `admin` account (the public demo password is never used in production)
    - `BREVO_API_KEY`: your Brevo key
-   - `APP_URL`: your Vercel address, e.g. `https://librisphere.vercel.app`
 
-   `OTP_SECRET` is generated automatically. The service gets an address like `https://librisphere-api.onrender.com`; if yours differs, update the two `destination` URLs in `vercel.json`.
+   `OTP_SECRET` is generated automatically, and `APP_URL` (the public site address used in reset-link emails) is set in `render.yaml`. The service gets an address like `https://librisphere-api.onrender.com`; if yours differs, update the two `destination` URLs in `vercel.json`.
 3. **Vercel** (https://vercel.com/new): import this GitHub repository. No build settings are needed; `vercel.json` serves `src/main/resources/static` and forwards `/api` and `/media` to Render.
 
 Every push to `master` redeploys both. Production settings are in `src/main/resources/application-prod.properties`.

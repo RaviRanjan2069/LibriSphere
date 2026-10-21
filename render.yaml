@@ -17,10 +17,11 @@ services:
         sync: false
       - key: BREVO_API_KEY
         sync: false
-      - key: APP_URL
-        sync: false
       - key: OTP_SECRET
         generateValue: true
+      # The public site (Vercel); password-reset links in emails point here
+      - key: APP_URL
+        value: https://librisphere-bookstore.vercel.app
       - key: BREVO_SENDER
         value: ravirajput2069@gmail.com
       - key: SUPPORT_EMAIL
