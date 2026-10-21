@@ -5,17 +5,39 @@
   "buildCommand": "",
   "outputDirectory": "src/main/resources/static",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://librisphere-api-ar00.onrender.com/api/:path*" },
-    { "source": "/media/:path*", "destination": "https://librisphere-api-ar00.onrender.com/media/:path*" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/ol-covers/:path*",
+      "destination": "https://covers.openlibrary.org/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://librisphere-api-ar00.onrender.com/api/:path*"
+    },
+    {
+      "source": "/media/:path*",
+      "destination": "https://librisphere-api-ar00.onrender.com/media/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
       ]
     }
   ]
