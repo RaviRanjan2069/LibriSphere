@@ -1,0 +1,7 @@
+# Vercel only serves src/main/resources/static; keep large and private folders out of uploads
+oracleJdk-27
+frontend
+target
+data
+config
+.mvn

@@ -1,0 +1,11 @@
+# Only pom.xml and src/ are needed to build the image
+.git
+.mvn
+.vscode
+target
+frontend
+oracleJdk-27
+data
+config
+*.md
+run.bat

@@ -51,12 +51,37 @@ On first start the database is filled with demo sellers, books and orders. Witho
 
 To work on the frontend, edit the files in `src/main/resources/static/` and reload the browser. There is nothing to install or build.
 
+## 🌐 Deployment (Vercel + Render + MongoDB Atlas)
+Vercel can't run a Java server, so the app is split across three free services:
+
+```
+Browser ──▶ <project>.vercel.app
+             ├─ HTML / CSS / JS            served by Vercel (src/main/resources/static)
+             └─ /api/*, /media/*  ──proxy──▶ Render: Spring Boot in Docker (render.yaml, Dockerfile)
+                                                └─▶ MongoDB Atlas
+```
+The browser only ever talks to the Vercel address, so sign-in cookies work as on a single site.
+
+1. **MongoDB Atlas** (https://cloud.mongodb.com): create a free M0 cluster, a database user, and allow access from anywhere (`0.0.0.0/0`, Render has no fixed IP). Copy the connection string and add the database name: `mongodb+srv://USER:PASS@cluster0.xxxxx.mongodb.net/librisphere`.
+2. **Render** (https://render.com): *New → Blueprint*, pick this GitHub repository; it reads `render.yaml`. Fill in:
+   - `MONGODB_URI`: the Atlas connection string
+   - `ADMIN_PASSWORD`: password for the `admin` account (the public demo password is never used in production)
+   - `BREVO_API_KEY`: your Brevo key
+   - `APP_URL`: your Vercel address, e.g. `https://librisphere.vercel.app`
+
+   `OTP_SECRET` is generated automatically. The service gets an address like `https://librisphere-api.onrender.com`; if yours differs, update the two `destination` URLs in `vercel.json`.
+3. **Vercel** (https://vercel.com/new): import this GitHub repository. No build settings are needed; `vercel.json` serves `src/main/resources/static` and forwards `/api` and `/media` to Render.
+
+Every push to `master` redeploys both. Production settings are in `src/main/resources/application-prod.properties`.
+
+**Free-plan limits:** the Render server sleeps after 15 minutes without visits; the first visit after that takes about a minute while it wakes up. Profile photos are stored on Render's disk, which the free plan resets on every deploy or restart.
+
 ---
 
 ## 🔑 Demo Accounts
 | Role | User id | Password | Notes |
 | :--- | :--- | :--- | :--- |
-| **Administrator** | `admin` | `admin123` | Sign in from the **Admin** tab |
+| **Administrator** | `admin` | `admin123` | Sign in from the **Admin** tab (locally only; in production the password is `ADMIN_PASSWORD`) |
 | **Seller A** | `vendor_a` | `vendor123` | Storefront: *Apex Books* (approved) |
 | **Seller B** | `vendor_b` | `vendor123` | Storefront: *Beacon Bookshop* (approved) |
 | **Seller C** | `vendor_c` | `vendor123` | Storefront: *Cosmos Reads* (waiting for admin approval) |

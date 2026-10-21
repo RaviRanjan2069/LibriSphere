@@ -9,6 +9,7 @@ import com.bookstore.ecommerce.repository.OrderItemRepository;
 import com.bookstore.ecommerce.repository.OrderRepository;
 import com.bookstore.ecommerce.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -36,6 +37,10 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private OrderItemRepository orderItemRepository;
 
+    // In production this comes from ADMIN_PASSWORD (see application-prod.properties), never the public demo password
+    @Value("${app.demo.admin-password:admin123}")
+    private String adminPassword;
+
     @Override
     public void run(String... args) throws Exception {
         if (userRepository.count() > 0) {
@@ -43,7 +48,7 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         // Initialize Users
-        User admin = new User("admin", passwordEncoder.encode("admin123"), "admin@bookstore.com", "ADMIN");
+        User admin = new User("admin", passwordEncoder.encode(adminPassword), "admin@bookstore.com", "ADMIN");
         admin.setVendorApproved(true);
         userRepository.save(admin);
 

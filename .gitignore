@@ -21,7 +21,7 @@ target/
 .DS_Store
 Thumbs.db
 # Local files: uploaded profile pictures (data/uploads); all app data lives in MongoDB
-data/
+/data/
 
 # Local secrets (e.g. the Brevo API key) in config/application.properties
-config/
+/config/

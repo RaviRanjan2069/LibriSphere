@@ -1,0 +1,27 @@
+# Render Blueprint: the Spring Boot API server (https://render.com/docs/blueprint-spec).
+# The website itself is served by Vercel, which forwards /api and /media here (see vercel.json).
+services:
+  - type: web
+    name: librisphere-api
+    runtime: docker
+    plan: free
+    region: singapore
+    healthCheckPath: /api/auth/otp/config
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      # Secrets: Render asks for these when the Blueprint is created
+      - key: MONGODB_URI
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: OTP_SECRET
+        generateValue: true
+      - key: BREVO_SENDER
+        value: ravirajput2069@gmail.com
+      - key: SUPPORT_EMAIL
+        value: mentora.smartlearning@gmail.com
