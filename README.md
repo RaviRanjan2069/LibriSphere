@@ -1,5 +1,14 @@
 # LibriSphere - Multi-Vendor Bookstore E-Commerce Platform
 
+**🌐 Live demo: https://librisphere-bookstore.vercel.app**
+
+[![Live demo](https://img.shields.io/badge/demo-live-1F5C4D?style=for-the-badge&logo=vercel)](https://librisphere-bookstore.vercel.app)
+![Java 21](https://img.shields.io/badge/Java-21-orange?style=for-the-badge)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+
+> Try it with the demo buyer `buyer` / `buyer123` or seller `vendor_a` / `vendor123`. The free server sleeps when idle, so the first visit can take about a minute.
+
 ## Overview
 LibriSphere is a multi-vendor bookstore e-commerce application. Independent sellers list their books, readers browse and buy from many sellers with a single cart, and administrators approve sellers and monitor the platform.
 
