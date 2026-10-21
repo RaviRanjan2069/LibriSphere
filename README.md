@@ -88,6 +88,8 @@ Every push to `master` redeploys both. Production settings are in `src/main/reso
 | **Seller C** | `vendor_c` | `vendor123` | Storefront: *Cosmos Reads* (waiting for admin approval) |
 | **Buyer** | `buyer` | `buyer123` | Existing customer with order history |
 
+Demo accounts use reserved `@example.com` addresses, so the site never emails them (no codes or reset links).
+
 > ⚠️ These passwords are public. Before putting the site online, sign in as each demo account and change its password from the Profile page, or create your own administrator from the Admin dashboard.
 
 ## 📋 Feature Details
@@ -110,7 +112,7 @@ Every push to `master` redeploys both. Production settings are in `src/main/reso
 **Accounts & security**
 - Sign-up verifies the email address with a 6-digit code and asks for the password twice; an optional profile photo can be added.
 - Sign in with user id or email + password, or with an emailed one-time code; **Keep me signed in** keeps the session for 30 days.
-- **Forgot password**: a single-use link (valid 30 minutes) is emailed to the account's verified address. Only a hash of the link's token is stored.
+- **Forgot password**: a single-use link (valid 30 minutes) is emailed to the account's address; using it also confirms that address. An address with no account gets a short note saying so instead. Only a hash of the link's token is stored.
 - **Profile** page: change or remove the photo; edit full name, gender and (sellers) shop name; confirm the email, or change it with a code sent to the new address; change the password; buyers can delete their account.
 - Passwords are stored as BCrypt hashes. Codes are stored only as HMACs, expire after 5 minutes, work once, and are rate limited. Sign-in, codes and reset links never reveal whether an address is registered.
 

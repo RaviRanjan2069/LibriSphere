@@ -48,21 +48,21 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         // Initialize Users
-        User admin = new User("admin", passwordEncoder.encode(adminPassword), "admin@bookstore.com", "ADMIN");
+        User admin = new User("admin", passwordEncoder.encode(adminPassword), "admin@example.com", "ADMIN");
         admin.setVendorApproved(true);
         userRepository.save(admin);
 
-        User buyer = new User("buyer", passwordEncoder.encode("buyer123"), "buyer@gmail.com", "BUYER");
+        User buyer = new User("buyer", passwordEncoder.encode("buyer123"), "buyer@example.com", "BUYER");
         buyer.setVendorApproved(true);
         userRepository.save(buyer);
 
-        User vendorA = new User("vendor_a", passwordEncoder.encode("vendor123"), "sales@apexbooks.com", "VENDOR", "Apex Books", true);
+        User vendorA = new User("vendor_a", passwordEncoder.encode("vendor123"), "apexbooks@example.com", "VENDOR", "Apex Books", true);
         userRepository.save(vendorA);
 
-        User vendorB = new User("vendor_b", passwordEncoder.encode("vendor123"), "contact@beaconbooks.net", "VENDOR", "Beacon Bookshop", true);
+        User vendorB = new User("vendor_b", passwordEncoder.encode("vendor123"), "beaconbookshop@example.com", "VENDOR", "Beacon Bookshop", true);
         userRepository.save(vendorB);
 
-        User vendorC = new User("vendor_c", passwordEncoder.encode("vendor123"), "admin@cosmosreads.org", "VENDOR", "Cosmos Reads & Zines", false);
+        User vendorC = new User("vendor_c", passwordEncoder.encode("vendor123"), "cosmosreads@example.com", "VENDOR", "Cosmos Reads & Zines", false);
         userRepository.save(vendorC);
 
         // Initialize Books — 75 titles, real covers (Open Library ISBN), prices in INR (₹)

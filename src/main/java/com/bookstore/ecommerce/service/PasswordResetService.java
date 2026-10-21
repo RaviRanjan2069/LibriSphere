@@ -28,7 +28,8 @@ import java.util.Optional;
 /**
  * "Forgot password" links. A link carries a random 256-bit token; only its SHA-256 hash is stored. Links
  * are single use, expire after {@code app.password-reset.ttl-minutes}, and asking for a new one cancels
- * the old. They are only sent to verified addresses, and the response never reveals whether one was sent.
+ * the old. Every address gets an email (a link, or a note that no account uses it), so the response never
+ * reveals whether an account exists. Reserved test addresses (the demo accounts) are never emailed.
  */
 @Service
 public class PasswordResetService {
@@ -73,8 +74,12 @@ public class PasswordResetService {
             throw new ApiException(HttpStatus.TOO_MANY_REQUESTS,
                     "Too many reset requests. Please wait a while before asking for another link.", "email");
         }
-        Optional<User> owner = users.findByEmailIgnoreCase(email).filter(User::isEmailVerified);
+        if (EmailAddresses.isReservedForTesting(email)) {
+            return; // demo addresses: nobody can receive the email
+        }
+        Optional<User> owner = users.findByEmailIgnoreCase(email);
         if (owner.isEmpty()) {
+            sendNoAccountNotice(email);
             return;
         }
         User user = owner.get();
@@ -88,6 +93,19 @@ public class PasswordResetService {
         } catch (CodeMailer.MailException e) {
             mongo.remove(Query.query(Criteria.where("_id").is(hash(token))), PasswordResetToken.class);
             log.error("Password reset email to {} failed: {}", CodeMailer.mask(user.getEmail()), e.getMessage());
+            throw new ApiException(HttpStatus.BAD_GATEWAY, "We couldn't send the email right now. Please try again in a minute.", "email");
+        }
+    }
+
+    /** The address has no account: say so (and how to create one) instead of sending nothing. */
+    private void sendNoAccountNotice(String email) {
+        try {
+            mailer.sendNotice(email, "LibriSphere password reset",
+                    "Someone asked to reset the password of a LibriSphere account for this email address, but no account uses it.\n\n"
+                            + "To create an account, go to " + publicUrl + "/register\n\n"
+                            + "If you didn't ask for this, you can ignore this email.");
+        } catch (CodeMailer.MailException e) {
+            log.error("Password reset notice to {} failed: {}", CodeMailer.mask(email), e.getMessage());
             throw new ApiException(HttpStatus.BAD_GATEWAY, "We couldn't send the email right now. Please try again in a minute.", "email");
         }
     }
@@ -107,6 +125,9 @@ public class PasswordResetService {
             throw invalidLink();
         }
         userService.changePassword(user.getId(), newPassword);
+        if (!user.isEmailVerified()) {
+            userService.markEmailVerified(user.getId()); // opening the emailed link proves the address is theirs
+        }
         mongo.remove(Query.query(Criteria.where("userId").is(user.getId())), PasswordResetToken.class);
     }
 

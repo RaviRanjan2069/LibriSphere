@@ -13,6 +13,15 @@ public final class EmailAddresses {
     private EmailAddresses() {
     }
 
+    /**
+     * True for addresses on domains reserved for testing and documentation (example.com, *.test, ...), such as the
+     * demo accounts' addresses. Nobody owns them, so the app never sends email to them.
+     */
+    public static boolean isReservedForTesting(String email) {
+        String domain = email == null ? "" : email.substring(email.lastIndexOf('@') + 1).toLowerCase(Locale.ROOT);
+        return domain.matches("(.+\\.)?example\\.(com|net|org)") || domain.matches(".+\\.(test|example|invalid|localhost)");
+    }
+
     /** @throws ApiException 400 for the "email" field if the address isn't valid */
     public static String normalize(String email) {
         String value = email == null ? "" : email.trim().toLowerCase(Locale.ROOT);

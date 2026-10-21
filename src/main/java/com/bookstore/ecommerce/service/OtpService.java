@@ -253,6 +253,9 @@ public class OtpService {
     }
 
     private boolean isEligible(Purpose purpose, String email) {
+        if (EmailAddresses.isReservedForTesting(email)) {
+            return false;
+        }
         Optional<User> owner = userRepository.findByEmailIgnoreCase(email);
         return switch (purpose) {
             // Only verified addresses: codes are never sent to addresses nobody has proved they own

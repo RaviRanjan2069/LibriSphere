@@ -159,7 +159,7 @@ public class AuthApiController {
     public Map<String, Object> forgotPassword(@RequestBody ForgotPasswordRequest req, HttpServletRequest request) {
         String email = EmailAddresses.normalize(req.email());
         passwordResetService.requestReset(email, request.getRemoteAddr());
-        return Map.of("message", "If an account with a verified email matches " + email + ", we've sent it a link to reset the password.",
+        return Map.of("message", "We've sent an email to " + email + ". If an account uses this address, it contains a link to reset the password.",
                 "expiresInMinutes", passwordResetService.getTtlMinutes());
     }
 

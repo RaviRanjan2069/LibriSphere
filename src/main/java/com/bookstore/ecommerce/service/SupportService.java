@@ -128,6 +128,9 @@ public class SupportService {
     }
 
     private void notify(String to, String subject, String text) {
+        if (EmailAddresses.isReservedForTesting(to)) {
+            return;
+        }
         try {
             mailer.sendNotice(to, subject, text);
         } catch (CodeMailer.MailException e) {

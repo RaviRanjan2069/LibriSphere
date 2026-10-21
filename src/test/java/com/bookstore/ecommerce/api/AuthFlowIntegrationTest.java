@@ -121,7 +121,7 @@ class AuthFlowIntegrationTest {
     }
 
     static String emailOf(String name) {
-        return name + "@example.com";
+        return name + "@librisphere-tests.com";
     }
 
     MockHttpServletRequestBuilder withCsrf(MockHttpServletRequestBuilder b) {
@@ -184,7 +184,7 @@ class AuthFlowIntegrationTest {
         User buyer = users.findByUsername("buyer").orElseThrow();
         assertTrue(buyer.getPassword().startsWith("$2"), "BCrypt hash stored");
         assertEquals(200, postJson("/api/auth/login", Map.of("username", "buyer", "password", "buyer123"), new MockHttpSession()).getResponse().getStatus());
-        assertEquals(200, postJson("/api/auth/login", Map.of("username", "BUYER@gmail.com", "password", "buyer123"), new MockHttpSession()).getResponse().getStatus(),
+        assertEquals(200, postJson("/api/auth/login", Map.of("username", "BUYER@EXAMPLE.COM", "password", "buyer123"), new MockHttpSession()).getResponse().getStatus(),
                 "email sign-in, case-insensitive");
         assertEquals(401, postJson("/api/auth/login", Map.of("username", "buyer", "password", "wrong"), new MockHttpSession()).getResponse().getStatus());
     }
@@ -301,9 +301,9 @@ class AuthFlowIntegrationTest {
         assertEquals(0, outbox.countFor(unknown), "nothing sent to an unregistered address");
 
         // demo accounts exist but never proved their address: no codes are sent to them either
-        MvcResult demo = postJson("/api/auth/otp/send", Map.of("email", "buyer@gmail.com", "purpose", "LOGIN"), new MockHttpSession());
+        MvcResult demo = postJson("/api/auth/otp/send", Map.of("email", "buyer@example.com", "purpose", "LOGIN"), new MockHttpSession());
         assertEquals(body(r).get("message"), body(demo).get("message"), "identical response");
-        assertEquals(0, outbox.countFor("buyer@gmail.com"));
+        assertEquals(0, outbox.countFor("buyer@example.com"));
 
         for (String guess : new String[]{"000000", "123456"}) {
             assertEquals(400, postJson("/api/auth/login/otp", Map.of("email", unknown, "code", guess), new MockHttpSession()).getResponse().getStatus());
@@ -392,11 +392,12 @@ class AuthFlowIntegrationTest {
     @Test
     void existingAccountVerifiesItsEmailThenSignsInWithCode() throws Exception {
         MockHttpSession s = new MockHttpSession();
+        String adminEmail = "site-admin@librisphere-tests.com";
+        mongo.updateFirst(Query.query(Criteria.where("username").is("admin")), new Update().set("email", adminEmail).set("emailVerified", false), User.class);
         postJson("/api/auth/login", Map.of("username", "admin", "password", "admin123"), s);
-        String adminEmail = "admin@bookstore.com";
         // the request body can't redirect the code to another address
-        assertEquals(200, postJson("/api/auth/otp/send", Map.of("email", "attacker@example.com", "purpose", "VERIFY_EMAIL"), s).getResponse().getStatus());
-        assertEquals(0, outbox.countFor("attacker@example.com"));
+        assertEquals(200, postJson("/api/auth/otp/send", Map.of("email", "attacker@librisphere-tests.com", "purpose", "VERIFY_EMAIL"), s).getResponse().getStatus());
+        assertEquals(0, outbox.countFor("attacker@librisphere-tests.com"));
         String code = outbox.lastCodeFor(adminEmail);
         assertNotNull(code);
         MvcResult r = postJson("/api/users/me/email/verify", Map.of("code", code), s);
@@ -455,14 +456,14 @@ class AuthFlowIntegrationTest {
     void emailChangeNeedsACodeSentToTheNewUnusedAddress() throws Exception {
         String name = freshName();
         MockHttpSession s = newBuyer(name);
-        assertEquals(409, postJson("/api/auth/otp/send", Map.of("email", "buyer@gmail.com", "purpose", "CHANGE_EMAIL"), s).getResponse().getStatus(),
+        assertEquals(409, postJson("/api/auth/otp/send", Map.of("email", "buyer@example.com", "purpose", "CHANGE_EMAIL"), s).getResponse().getStatus(),
                 "address used by another account");
         assertEquals(400, postJson("/api/auth/otp/send", Map.of("email", emailOf(name), "purpose", "CHANGE_EMAIL"), s).getResponse().getStatus(),
                 "same address");
-        assertEquals(401, postJson("/api/auth/otp/send", Map.of("email", "x@example.com", "purpose", "CHANGE_EMAIL"), new MockHttpSession())
+        assertEquals(401, postJson("/api/auth/otp/send", Map.of("email", "x@librisphere-tests.com", "purpose", "CHANGE_EMAIL"), new MockHttpSession())
                 .getResponse().getStatus(), "needs sign-in");
 
-        String next = "new-" + name + "@example.com";
+        String next = "new-" + name + "@librisphere-tests.com";
         assertEquals(200, postJson("/api/auth/otp/send", Map.of("email", next, "purpose", "CHANGE_EMAIL"), s).getResponse().getStatus());
         String code = outbox.lastCodeFor(next);
         assertNotNull(code, "code goes to the new address");
@@ -580,15 +581,28 @@ class AuthFlowIntegrationTest {
     }
 
     @Test
-    void resetLinksOnlyGoToVerifiedAccountsAndTheAnswerIsTheSame() throws Exception {
+    void forgotPasswordEmailsEveryAddressButNeverTestAddresses() throws Exception {
+        // no account: a note saying so (not a link), with the same answer as for a real account
         String unknown = emailOf(freshName());
         MvcResult r = postJson("/api/auth/password/forgot", Map.of("email", unknown), new MockHttpSession());
         assertEquals(200, r.getResponse().getStatus(), "same answer, so it doesn't reveal which addresses have accounts");
-        assertEquals(0, outbox.countFor(unknown));
-        mongo.updateFirst(Query.query(Criteria.where("username").is("vendor_b")), new Update().set("emailVerified", false), User.class);
-        String unverified = users.findByUsername("vendor_b").orElseThrow().getEmail();
-        assertEquals(200, postJson("/api/auth/password/forgot", Map.of("email", unverified), new MockHttpSession()).getResponse().getStatus());
-        assertEquals(0, outbox.countFor(unverified));
+        assertEquals(1, outbox.countFor(unknown));
+        assertNull(outbox.lastCodeFor(unknown), "a notice, not a reset link");
+
+        // an account whose email was never verified still gets a link, and using it confirms the address
+        String name = freshName();
+        newBuyer(name);
+        mongo.updateFirst(Query.query(Criteria.where("username").is(name)), new Update().set("emailVerified", false), User.class);
+        postJson("/api/auth/password/forgot", Map.of("email", emailOf(name)), new MockHttpSession());
+        String token = resetTokenFor(emailOf(name));
+        assertEquals(200, postJson("/api/auth/password/reset",
+                Map.of("token", token, "newPassword", "fresh-pass-1", "confirmPassword", "fresh-pass-1"), new MockHttpSession()).getResponse().getStatus());
+        assertTrue(users.findByUsername(name).orElseThrow().isEmailVerified());
+
+        // demo accounts use reserved example.com addresses, which are never emailed
+        assertEquals("buyer@example.com", users.findByUsername("buyer").orElseThrow().getEmail());
+        assertEquals(200, postJson("/api/auth/password/forgot", Map.of("email", "buyer@example.com"), new MockHttpSession()).getResponse().getStatus());
+        assertEquals(0, outbox.countFor("buyer@example.com"));
     }
 
     @Test
