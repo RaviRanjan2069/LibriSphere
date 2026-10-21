@@ -52,9 +52,9 @@ mvnw.cmd spring-boot:run        # Windows
 ./mvnw spring-boot:run          # macOS / Linux
 ```
 
-Open your browser:
+Open your browser at **http://localhost:9090** (this address only works on the computer running the app).
 
-http://localhost:9090
+Don't want to set anything up? Use the live demo instead: **https://librisphere-bookstore.vercel.app**
 
 On first start the database is filled with demo sellers, books and orders. Without email settings the app runs in **development mode**: codes are printed in the console and filled in automatically (see the Email section below to send real emails).
 
