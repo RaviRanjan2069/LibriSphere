@@ -1,34 +1,27 @@
 package com.bookstore.ecommerce.model;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
-@Entity
-@Table(name = "order_items")
-public class OrderItem {
+@Document(collection = "order_items")
+public class OrderItem implements SequencedDocument {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
+    // Lazy: the order loads its items, so an eager reference back would recurse
+    @DocumentReference(lazy = true)
     private Order order;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "book_id", nullable = false)
+    @DocumentReference
     private Book book;
-
-    @Column(nullable = false)
     private int quantity;
-
-    @Column(nullable = false)
     private double price;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "vendor_id", nullable = false)
+    @DocumentReference
     private User vendor;
-
-    @Column(nullable = false)
     private String status = "PENDING"; // "PENDING", "SHIPPED", "DELIVERED"
 
     public OrderItem() {
@@ -97,5 +90,11 @@ public class OrderItem {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    /** Items can be cancelled until the seller ships them. */
+    @Transient
+    public boolean isCancellable() {
+        return "PENDING".equals(status);
     }
 }

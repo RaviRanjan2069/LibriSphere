@@ -1,26 +1,33 @@
 package com.bookstore.ecommerce.model;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "users")
-public class User {
+import java.time.Instant;
+
+@Document(collection = "users")
+public class User implements SequencedDocument {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(unique = true, nullable = false)
+    @Indexed(unique = true)
     private String username;
-
-    @Column(nullable = false)
-    private String password;
-
-    @Column(unique = true, nullable = false)
+    private String password; // BCrypt hash, never plaintext
+    @Indexed(unique = true)
     private String email;
-
-    @Column(nullable = false)
     private String role; // "BUYER", "VENDOR", "ADMIN"
+
+    // Optional profile details; null when not given
+    private String fullName;
+    private String gender; // "MALE", "FEMALE", "OTHER"
+
+    // True once the user has proved they own the email address with a one-time code
+    private boolean emailVerified;
+    private Instant emailVerifiedAt;
+
+    // Storage key of the profile picture (e.g. "avatars/3f2a....jpg"); null means the default avatar
+    private String avatarKey;
 
     // Vendor specific fields
     private String vendorName;
@@ -86,6 +93,22 @@ public class User {
         this.role = role;
     }
 
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
     public String getVendorName() {
         return vendorName;
     }
@@ -100,6 +123,30 @@ public class User {
 
     public void setVendorApproved(boolean vendorApproved) {
         this.vendorApproved = vendorApproved;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
+    }
+
+    public Instant getEmailVerifiedAt() {
+        return emailVerifiedAt;
+    }
+
+    public void setEmailVerifiedAt(Instant emailVerifiedAt) {
+        this.emailVerifiedAt = emailVerifiedAt;
+    }
+
+    public String getAvatarKey() {
+        return avatarKey;
+    }
+
+    public void setAvatarKey(String avatarKey) {
+        this.avatarKey = avatarKey;
     }
 
     @Override

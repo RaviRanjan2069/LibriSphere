@@ -1,38 +1,23 @@
 package com.bookstore.ecommerce.model;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
-@Entity
-@Table(name = "books")
-public class Book {
+@Document(collection = "books")
+public class Book implements SequencedDocument {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
     private String title;
-
-    @Column(nullable = false)
     private String author;
-
-    @Column(length = 2000)
     private String description;
-
-    @Column(nullable = false)
     private double price;
-
-    @Column(nullable = false)
     private int stock;
-
-    @Column(nullable = false)
     private String category;
-
-    @Column(name = "cover_url")
     private String coverUrl;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "vendor_id", nullable = false)
+    @DocumentReference
     private User vendor;
 
     public Book() {

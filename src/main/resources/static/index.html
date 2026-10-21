@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Other sites only ever see this site's origin, never a full URL (reset links carry a token) -->
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>LibriSphere</title>
+    <!-- Apply the saved theme before the page renders to avoid a flash -->
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('theme');
+                if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+            } catch (e) {}
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <!-- Plain JavaScript modules, no build step: js/app.js is the entry point -->
+    <script type="module" src="/js/app.js"></script>
+</head>
+<body>
+    <div id="app"></div>
+    <noscript><p style="padding: 24px">LibriSphere needs JavaScript to run. Please enable it and reload the page.</p></noscript>
+</body>
+</html>

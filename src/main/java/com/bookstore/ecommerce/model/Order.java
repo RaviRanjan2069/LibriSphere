@@ -1,41 +1,32 @@
 package com.bookstore.ecommerce.model;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.ReadOnlyProperty;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "orders")
-public class Order {
+@Document(collection = "orders")
+public class Order implements SequencedDocument {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "buyer_id", nullable = false)
+    @DocumentReference
     private User buyer;
-
-    @Column(name = "buyer_name", nullable = false)
     private String buyerName;
-
-    @Column(name = "shipping_address", nullable = false)
     private String shippingAddress;
-
-    @Column(name = "contact_number", nullable = false)
     private String contactNumber;
-
-    @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate;
-
-    @Column(nullable = false)
-    private String status; // "PENDING", "SHIPPED", "DELIVERED"
-
-    @Column(name = "total_price", nullable = false)
+    private String status; // "PENDING", "SHIPPED", "DELIVERED", "CANCELLED"
     private double totalPrice;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    // Items live in their own collection and point back to this order; loaded by lookup, never written here
+    @ReadOnlyProperty
+    @DocumentReference(lookup = "{ 'order' : ?#{#self._id} }")
     private List<OrderItem> items = new ArrayList<>();
 
     public Order() {
@@ -122,5 +113,28 @@ public class Order {
 
     public void setItems(List<OrderItem> items) {
         this.items = items;
+    }
+
+    /** The buyer can cancel while nothing has shipped yet and at least one item is still pending. */
+    @Transient
+    public boolean isCancellable() {
+        boolean anyPending = items.stream().anyMatch(OrderItem::isCancellable);
+        boolean allPendingOrCancelled = items.stream()
+                .allMatch(i -> "PENDING".equals(i.getStatus()) || "CANCELLED".equals(i.getStatus()));
+        return anyPending && allPendingOrCancelled;
+    }
+
+    /** Value of cancelled items, refunded to the buyer. */
+    @Transient
+    public double getRefundAmount() {
+        return items.stream()
+                .filter(i -> "CANCELLED".equals(i.getStatus()))
+                .mapToDouble(i -> i.getPrice() * i.getQuantity())
+                .sum();
+    }
+
+    @Transient
+    public long getActiveItemCount() {
+        return items.stream().filter(i -> !"CANCELLED".equals(i.getStatus())).count();
     }
 }
