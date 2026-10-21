@@ -70,7 +70,7 @@ The browser only ever talks to the Vercel address, so sign-in cookies work as on
    - `ADMIN_PASSWORD`: password for the `admin` account (the public demo password is never used in production)
    - `BREVO_API_KEY`: your Brevo key
 
-   `OTP_SECRET` is generated automatically, and `APP_URL` (the public site address used in reset-link emails) is set in `render.yaml`. The service gets an address like `https://librisphere-api.onrender.com`; if yours differs, update the two `destination` URLs in `vercel.json`.
+   `OTP_SECRET` is generated automatically, and `APP_URL` (the public site address used in reset-link emails) is set in `render.yaml`. The service gets an address like `https://librisphere-api-ar00.onrender.com`; if yours differs, update the two `destination` URLs in `vercel.json`.
 3. **Vercel** (https://vercel.com/new): import this GitHub repository. No build settings are needed; `vercel.json` serves `src/main/resources/static` and forwards `/api` and `/media` to Render.
 
 Every push to `master` redeploys both. Production settings are in `src/main/resources/application-prod.properties`.
